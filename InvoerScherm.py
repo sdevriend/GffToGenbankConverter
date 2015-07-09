@@ -12,7 +12,13 @@ from SubPaneel import SubPaneel
 from KnoppenPaneel import KnoppenPaneel
 
 class InvoerScherm(wx.Frame):
+    """
+    De class is niet helemaal af!
 
+    De class toont 3 panelen voor bladeren naar een bestand.
+    Dit zit in middenstuk
+    in links wordt het bladeren correct toegevoegt.
+    """
     def __init__(self, parent, id=wx.ID_ANY,
                  title='', pos=wx.DefaultPosition, size=(0, 0),
                  style=wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER |
@@ -61,6 +67,10 @@ class InvoerScherm(wx.Frame):
         return PanLinks
 
     def browsegff(self, event):
+        """
+        De methode kan bladeren naar een bestand en het bestandsnaam
+        daarvan opslaan in een variable.
+        """
         print "blader naar file"
         wildcard = """gff(*.gff)|*.gff"""
         self.blad = wx.FileDialog(self, "Bladeren", os.getcwd(), "",
