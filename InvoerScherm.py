@@ -43,12 +43,17 @@ class InvoerScherm(wx.Frame):
     def middenstuk(self):
         
         
+        
+        
+        
+        
         PanMid = SubPaneel(self, style=wx.SUNKEN_BORDER)
         PanMid.SetBackgroundColour((0, 0, 255))
         PanRechts = SubPaneel(self, style=wx.SUNKEN_BORDER)
         PanRechts.SetBackgroundColour((125, 0, 250))
         self.Hbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.Hbox.Add(self.maakLinks(), 1, wx.ALL | wx.EXPAND, 10)
+        
+        self.Hbox.Add(self.maakLinks(), 1, wx.EXPAND)
         self.Hbox.Add(PanMid, 1, wx.ALL | wx.EXPAND, 10, 0)
         self.Hbox.Add(PanRechts, 1, wx.ALL | wx.EXPAND, 10)
 
@@ -64,7 +69,13 @@ class InvoerScherm(wx.Frame):
         vbox.Add(self.bladerknop, 0)
         vbox.Add(self.gffnaam, 0)
         PanLinks.SetSizer(vbox)
-        return PanLinks
+        LVbox = wx.BoxSizer(wx.VERTICAL)
+        linkstext = wx.StaticText(self, id=-1, label="GFF bestand")
+        font = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        linkstext.SetFont(font)
+        LVbox.Add(linkstext, 1, wx.ALL | wx.ALIGN_CENTER )
+        LVbox.Add(PanLinks, 15, wx.ALL | wx.EXPAND, 10)
+        return LVbox
 
     def browsegff(self, event):
         """
