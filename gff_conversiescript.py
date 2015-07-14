@@ -31,16 +31,16 @@ def main():
 
 
 def insert_values(maxpar, extrapar, type):
-    readfile = open('test_def.gbk', 'r')
+    readfile = open('test_def2.gbk', 'r')
     lines = readfile.readlines()
     readfile.close()
     if type == 2:
-        insertstring = "\t source\t\t\t\t\t" + str(maxpar) + ".." + str(extrapar) + "\n"
+        insertstring = "\t source\t\t\t\t\t" + "1" + ".." + str(maxpar) + "\n"
 
     if type == 0:
-        insertstring = "LOCUS\t\t%s\t\t%s" % (str(extrapar), str(maxpar) + "\n")
+        insertstring = "LOCUS\t\t%s\t%s" % (str(extrapar), str(maxpar) + " bp \t DNA \n")
     lines[type] = insertstring
-    writefile = open('test_def.gbk', 'w')
+    writefile = open('test_def2.gbk', 'w')
     for line in lines:
         writefile.write(line)
 
@@ -51,7 +51,7 @@ def write_file(wfgenbank):
     en voegt de parameter toe aan het bestand.
     """
 
-    openfile = open('test_def.gbk', 'a')
+    openfile = open('test_def2.gbk', 'a')
     openfile.write(str(wfgenbank))
     openfile.close()
 
