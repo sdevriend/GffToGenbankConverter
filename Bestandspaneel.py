@@ -8,13 +8,16 @@ from SubPaneel import SubPaneel
 
 class Bestandspaneel(wx.Panel):
     def __init__(self, parent, wildcard, id=wx.ID_ANY, size=wx.DefaultSize,
-                 label=""):
+                 label="", save=False):
         self.BestandPaneel = wx.Panel.__init__(self, parent, id, size=size)
         self.wildcard = wildcard
         LinkstextPanl = SubPaneel(self)
-        
+        self.bestandsnaam = "" 
         self.bladerknop = wx.Button(LinkstextPanl, -1, label="bladeren")
-        self.bladerknop.Bind(wx.EVT_BUTTON, self.browsefile)
+        if save:
+            self.bladerknop.Bind(wx.EVT_BUTTON, self.savefile)
+        else:
+            self.bladerknop.Bind(wx.EVT_BUTTON, self.browsefile)
 
         
         LHbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -56,8 +59,16 @@ class Bestandspaneel(wx.Panel):
             self.bestandsnaam = blad.GetPath()
             self.setBestandsNaam()
 
-
+    def savefile(self, event):
+        blad = wx.FileDialog(self, "Bladeren", os.getcwd(), "",
+                                  self.wildcard, wx.SAVE | wx.OVERWRITE_PROMPT)
+        if blad.ShowModal() == wx.ID_OK:
+            self.bestandsnaam = blad.GetPath()
+            self.setBestandsNaam()
     def setBestandsNaam(self):
         naam = self.bestandsnaam.split("\\")
         self.BestandText.SetLabel(label=naam[len(naam)-1])
+
         
+    def getFilePath(self):
+        return self.bestandsnaam

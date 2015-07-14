@@ -55,3 +55,8 @@ class KnoppenPaneel(wx.Panel):
         
         
         
+    def getGoKnopId(self):
+	return self.GoKnop.GetId()
+
+    def getHelpKnopId(self):
+	return self.HelpKnop.GetId()

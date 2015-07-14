@@ -22,6 +22,7 @@ class ConvertInterface(wx.App):
         self.SchermNr = 0
         self.SchermLijst = [InvoerScherm]
         self.SchermController()
+        self.Bind(wx.EVT_BUTTON, self.KnopBeheer)
         return True
 
 
@@ -32,6 +33,35 @@ class ConvertInterface(wx.App):
                                                      size=schermFormaat)
 
 
+    def KnopBeheer(self, event):
+        Doorgaan = self.frame.getGoKnop()
+        Help = self.frame.getHelpKnopId()
+        if event.GetId() == Doorgaan:
+            self.files = self.frame.GetNamen()
+            if "" in self.files:
+                wx.MessageBox("Niet alles is ingevuld!", "Foutmelding",
+                              wx.OK | wx.ICON_ERROR)
+            else:
+                try:
+                    raise ValueError
+                    pass # script hier
+                except:
+                    wx.MessageBox("Er is iets fout gegaan bij het converteren" +
+                                  " probeer het eens met een ander bestand.",
+                                  "Fout bij het converteren",
+                                  wx.OK | wx.ICON_ERROR)
+                pass ## start script.
+            
+        elif event.GetId() == Help:
+            wx.MessageBox("Hier kunt u de files inladen die nodig zijn" +
+                          " die nodig zijn voor de conversie. \n" +
+                          "\tU heeft nodig:\n\n" +
+                          "\t\t-Een gff bestand\n" +
+                          "\t\t-Een raw bestand met een sequentie daarin\n"
+                          "\t\t-Een annotation bestand", "Info", wx.OK)
+                          
 
+
+            
 app = ConvertInterface(False)
 app.MainLoop()
