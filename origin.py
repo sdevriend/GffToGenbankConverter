@@ -1,6 +1,7 @@
 seq = "TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST"
 
-def origin(seq):
+def origin():
+    "ACGT"*100000
     lijst = [seq[x:x+10] for x in range(0, len(seq), 10)]
     out = ""
     for x in range(0, len(lijst), 6):
@@ -11,4 +12,4 @@ def origin(seq):
         ((" %s "*parts)%tuple(lijst[x:x+parts])) + "\n")
     return out
 
-print origin(seq)
+print origin()

@@ -14,14 +14,14 @@ def main():
     highest_stop = 0
     lowest_start = 2 ** 32
     stopwatch = Statistiek()
-    write_file('LOCUS PLACEHOLDER')
+    write_file('LOCUS PLACEHOLDER\n')
     write_file('FEATURES\t\tLocation/Qualifiers\n')
     write_file("PLACEHOLDER\n")
     print "GFF bestand openen"
     highest_stop, lowest_start = open_gff(highest_stop, lowest_start)
     print "Bestand genereren"
-    insert_values(highest_stop, lowest_start, 1)
-    insert_values(highest_stop, "unspecified")
+    insert_values(highest_stop, lowest_start, 2)
+    insert_values(highest_stop, "unspecified", 0)
     print "Sequentie schrijven"
     write_file(origin())
     sluiter = "//"
@@ -30,18 +30,15 @@ def main():
     stopwatch.stop()
 
 
-
-
 def insert_values(maxpar, extrapar, type):
-
     readfile = open('test_def.gbk', 'r')
     lines = readfile.readlines()
     readfile.close()
-    if type == 1:
+    if type == 2:
         insertstring = "\t source\t\t\t\t\t" + str(maxpar) + ".." + str(extrapar) + "\n"
 
     if type == 0:
-        insertstring = "LOCUS\t\t%s\t\t%s"%(str(extrapar),str(maxpar))
+        insertstring = "LOCUS\t\t%s\t\t%s" % (str(extrapar), str(maxpar) + "\n")
     lines[type] = insertstring
     writefile = open('test_def.gbk', 'w')
     for line in lines:
@@ -77,7 +74,7 @@ def open_gff(highest_stop, lowest_start):
                 lowest_start = int(row[4])
             make_gb(row, filters(row))
 
-    return lowest_start, highest_stop
+    return highest_stop, lowest_start
 
 
 def make_gb(mgb_rijen, mgb_attrijen):
