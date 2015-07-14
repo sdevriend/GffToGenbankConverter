@@ -29,12 +29,12 @@ def main():
     print "Klaar!"
     stopwatch.stop()
 
-    
+
 
 
 def insert_values(maxpar, extrapar, type):
 
-    readfile = open('extratest.gbk', 'r')
+    readfile = open('test_def.gbk', 'r')
     lines = readfile.readlines()
     readfile.close()
     if type == 1:
@@ -43,7 +43,7 @@ def insert_values(maxpar, extrapar, type):
     if type == 0:
         insertstring = "LOCUS\t\t%s\t\t%s"%(str(extrapar),str(maxpar))
     lines[type] = insertstring
-    writefile = open('extratest.gbk', 'w')
+    writefile = open('test_def.gbk', 'w')
     for line in lines:
         writefile.write(line)
 
@@ -54,7 +54,7 @@ def write_file(wfgenbank):
     en voegt de parameter toe aan het bestand.
     """
 
-    openfile = open('extratest.gbk', 'a')
+    openfile = open('test_def.gbk', 'a')
     openfile.write(str(wfgenbank))
     openfile.close()
 
