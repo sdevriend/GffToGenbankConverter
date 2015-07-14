@@ -6,10 +6,13 @@ invoeren.
 """
 
 import wx
+#import wx.lib.stattext as ST
+
 import os
 
 from SubPaneel import SubPaneel
 from KnoppenPaneel import KnoppenPaneel
+from Bestandspaneel import Bestandspaneel
 
 class InvoerScherm(wx.Frame):
     """
@@ -30,12 +33,9 @@ class InvoerScherm(wx.Frame):
         self.bestandsnaam = ""
         self.middenstuk()
         self.Vbox = wx.BoxSizer(wx.VERTICAL)
-        self.Vbox.Add(self.Hbox, 17, wx.ALL | wx.EXPAND)
+        self.Vbox.Add(self.VMidBox, 17, wx.ALL | wx.EXPAND)
         self.Knoppen = KnoppenPaneel(self)
-        self.Vbox.Add(self.Knoppen, 3, wx.ALL | wx.EXPAND)
-        
-        self.Knoppen.SetBackgroundColour((0, 255, 0))
-        
+        self.Vbox.Add(self.Knoppen, 3, wx.ALL | wx.EXPAND)        
         self.SetSizer(self.Vbox)
         self.SetBackgroundColour(None)
         self.Show()
@@ -47,42 +47,47 @@ class InvoerScherm(wx.Frame):
         
         
         
-        PanMid = SubPaneel(self, style=wx.SUNKEN_BORDER)
+        PanMid = SubPaneel(self, style=wx.SUNKEN_BORDER)## Mac interface
         PanMid.SetBackgroundColour((0, 0, 255))
         PanRechts = SubPaneel(self, style=wx.SUNKEN_BORDER)
-        PanRechts.SetBackgroundColour((125, 0, 250))
-        self.Hbox = wx.BoxSizer(wx.HORIZONTAL)
+        PanRechts.SetBackgroundColour((125, 0, 250))## Mac interface
+        self.VMidBox = wx.BoxSizer(wx.VERTICAL)
         
-        self.Hbox.Add(self.maakLinks(), 1, wx.EXPAND)
-        self.Hbox.Add(PanMid, 1, wx.ALL | wx.EXPAND, 10, 0)
-        self.Hbox.Add(PanRechts, 1, wx.ALL | wx.EXPAND, 10)
+        #self.VMidBox.Add(self.maakGFFDeel(),-1, wx.ALL, 10 )
+        self.VMidBox.Add(Bestandspaneel(self,"""gff(*.gff)|*.gff""",
+                                        label="blablabla"),-1, wx.ALL, 10 )
+        self.VMidBox.Add(PanMid, 1, wx.ALL | wx.EXPAND, 10)
+        self.VMidBox.Add(PanRechts, 1, wx.ALL | wx.EXPAND, 10)
 
 
-    def maakLinks(self):
-        PanLinks = SubPaneel(self, style=wx.SUNKEN_BORDER)
-        PanLinks.SetBackgroundColour((255, 0, 0 ))
-        self.gffnaam = wx.StaticText(PanLinks, id=-1, label="Geen bestand" +
-                                     "geselecteerd")
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        self.bladerknop = wx.Button(PanLinks, -1, label="bladeren")
+    def maakGFFDeel(self):
+        LinkerPan = SubPaneel(self)
+        self.PanLinks = SubPaneel(self, style=wx.SUNKEN_BORDER)
+        self.gffnaam = wx.StaticText(self.PanLinks, id=-1, label="Geen bestand" +
+                                     " geselecteerd ")
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.bladerknop = wx.Button(LinkerPan, -1, label="bladeren")
         self.bladerknop.Bind(wx.EVT_BUTTON, self.browsegff)
-        vbox.Add(self.bladerknop, 0)
-        vbox.Add(self.gffnaam, 0)
-        PanLinks.SetSizer(vbox)
-        LVbox = wx.BoxSizer(wx.VERTICAL)
-        linkstext = wx.StaticText(self, id=-1, label="GFF bestand")
+        hbox.Add(self.gffnaam, 3, wx.EXPAND, wx.ALL)
+        self.PanLinks.SetSizer(hbox)
+        
+        self.LHbox = wx.BoxSizer(wx.HORIZONTAL)
+        linkstext = wx.StaticText(LinkerPan, id=-1, label="GFF bestand")
         font = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD)
         linkstext.SetFont(font)
-        LVbox.Add(linkstext, 1, wx.ALL | wx.ALIGN_CENTER )
-        LVbox.Add(PanLinks, 15, wx.ALL | wx.EXPAND, 10)
-        return LVbox
+        vboxnambro = wx.BoxSizer(wx.VERTICAL)
+        vboxnambro.Add(linkstext )
+        vboxnambro.Add(self.bladerknop)
+        LinkerPan.SetSizer(vboxnambro)
+        self.LHbox.Add(LinkerPan, 3,  wx.EXPAND )
+        self.LHbox.Add(self.PanLinks, 17, wx.ALIGN_BOTTOM , 10)
+        return self.LHbox
 
     def browsegff(self, event):
         """
         De methode kan bladeren naar een bestand en het bestandsnaam
         daarvan opslaan in een variable.
         """
-        print "blader naar file"
         wildcard = """gff(*.gff)|*.gff"""
         self.blad = wx.FileDialog(self, "Bladeren", os.getcwd(), "",
                                   wildcard, wx.OPEN)
@@ -92,4 +97,7 @@ class InvoerScherm(wx.Frame):
             
     def setgffnaam(self):
         naam = self.bestandsnaam.split("\\")
-        self.gffnaam.SetLabel("Geselecteerd bestand: \n" + naam[len(naam)-1])
+        self.gffnaam.SetLabel(label=naam[len(naam)-1])
+        
+        
+        
