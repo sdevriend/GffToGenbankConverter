@@ -2,7 +2,7 @@ SUPERSTRING = ''
 import csv
 from Statistiek import Statistiek
 from origin import origin
-
+from Refference import check
 
 def main():
     """
@@ -113,7 +113,11 @@ def make_gb(mgb_rijen, mgb_attrijen):
     finalstring += feature
     # Tweede: gene
     gene = str("\t\t\t\t /gene=\"%s\"\n") % mgb_attdict.get('id')
-    finalstring += gene
+    if "cypCar" in gene:
+        print check(gene.split("-")[0].split("\"")[1])
+        finalstring += str(check(gene.split("-")[0].split("\"")[1]))
+    else:
+        finalstring += gene
     # Derde: note
     note = mgb_attdict.get('note')
 
