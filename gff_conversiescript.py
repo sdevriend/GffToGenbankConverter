@@ -1,8 +1,12 @@
 SUPERSTRING = ''
 import csv
 from Statistiek import Statistiek
-from origin import origin
+import origin
 from Refference import check
+from Merger import Merger
+
+
+
 
 def main():
     """
@@ -11,19 +15,20 @@ def main():
     het filteren van de attributen, het maken van de genbank file en
     het schrijven van de afsluitende tag //
     """
-    highest_stop = 0
-    lowest_start = 2 ** 32
+    merger = Merger()
+    highest_stop = len(merger.get_fasta())
+    lowest_start = 1
     stopwatch = Statistiek()
     write_file('LOCUS PLACEHOLDER\n')
     write_file('FEATURES\t\tLocation/Qualifiers\n')
     write_file("PLACEHOLDER\n")
     print "GFF bestand openen"
-    highest_stop, lowest_start = open_gff(highest_stop, lowest_start)
+    open_gff()
     print "Bestand genereren"
     insert_values(highest_stop, lowest_start, 2)
     insert_values(highest_stop, "unspecified", 0)
     print "Sequentie schrijven"
-    write_file(origin())
+    write_file(origin.origin())
     sluiter = "//"
     write_file(sluiter)
     print "Klaar!"
@@ -56,7 +61,7 @@ def write_file(wfgenbank):
     openfile.close()
 
 
-def open_gff(highest_stop, lowest_start):
+def open_gff():
     """
     Het gff bestand wordt geopend, de rijen in het bestand
     worden toegevoegd aan een nieuwe lijst. Deze wordt
@@ -65,16 +70,11 @@ def open_gff(highest_stop, lowest_start):
 
     gff_file = open('test_def.gff', 'rb', buffering=1)
     reader = csv.reader(gff_file, delimiter="\t")
-    print str(lowest_start)
     for row in reader:
         if "#" not in row[0]:
-            if int(row[3]) > highest_stop:
-                highest_stop = int(row[3])
-            if int(row[4]) < lowest_start:
-                lowest_start = int(row[4])
             make_gb(row, filters(row))
 
-    return highest_stop, lowest_start
+
 
 
 def make_gb(mgb_rijen, mgb_attrijen):
@@ -100,6 +100,21 @@ def make_gb(mgb_rijen, mgb_attrijen):
 
     mgb_attdict = mgb_attrijen
     finalstring = ''
+    samenvoegen = Merger()
+    samenvoegen.do_dict()
+    contigdict = samenvoegen.get_dict()
+    if "contig" in mgb_attdict.get('id').lower():
+        # print mgb_attdict.get('id').lower()
+        if ":" in mgb_attdict.get('id'):
+            contig = mgb_attdict.get('id').split(':')[0]
+        elif ":" not in mgb_attdict.get('id'):
+            contig = mgb_attdict.get('id')
+        else:
+            contig = "AAAA"
+        try:
+            print contigdict[contig][0]
+        except KeyError:
+            pass
 
     # Eerste: feature
 
@@ -114,8 +129,9 @@ def make_gb(mgb_rijen, mgb_attrijen):
     # Tweede: gene
     gene = str("\t\t\t\t /gene=\"%s\"\n") % mgb_attdict.get('id')
     if "cypCar" in gene:
-        print check(gene.split("-")[0].split("\"")[1])
-        finalstring += str(check(gene.split("-")[0].split("\"")[1]))
+        # print check(gene.split("-")[0].split("\"")[1])
+        geneid = str(check(gene.split("-")[0].split("\"")[1]))
+        finalstring += str("\t\t\t\t /gene=\"%s\"\n") % geneid
     else:
         finalstring += gene
     # Derde: note

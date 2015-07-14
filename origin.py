@@ -1,8 +1,9 @@
 
-
+from Merger import Merger
 
 def origin():
-    seq = "ACGT" * (386160 / 4)
+    merger = Merger()
+    seq = merger.get_fasta()
     lijst = [seq[x:x + 10] for x in range(0, len(seq), 10)]
     out = "ORIGIN\n"
     for x in range(0, len(lijst), 6):
@@ -14,4 +15,4 @@ def origin():
     return out
 
 
-print origin()
+#print origin()

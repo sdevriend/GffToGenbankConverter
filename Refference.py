@@ -18,9 +18,10 @@ def refference():
 
 
 def check(paramkey):
+    paramkey += "-RA"
     for key in annotationdict.keys():
         # print key
         if key == paramkey:
             return str(annotationdict[key][0])
 refference()
-print (check("cypCar_00000001-RA"))
+#print (check("cypCar_00000001-RA"))
