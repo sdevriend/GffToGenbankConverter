@@ -1,11 +1,13 @@
+from datetime import datetime
+
 SUPERSTRING = ''
 import csv
 from Statistiek import Statistiek
 import origin
 from Refference import check
 from Merger import Merger
-
-
+from Writefile import write_file
+from Fastagenerator import generate_fasta
 
 
 def main():
@@ -15,20 +17,32 @@ def main():
     het filteren van de attributen, het maken van de genbank file en
     het schrijven van de afsluitende tag //
     """
+    print "Merger maken"
     merger = Merger()
-    highest_stop = len(merger.get_fasta())
-    lowest_start = 1
+
+    print "Merger klaar"
+
     stopwatch = Statistiek()
     write_file('LOCUS PLACEHOLDER\n')
     write_file('FEATURES\t\tLocation/Qualifiers\n')
     write_file("PLACEHOLDER\n")
     print "GFF bestand openen"
-    open_gff()
+    open_gff(merger)
+
     print "Bestand genereren"
+    print "DO FASTA"
+
+    # print merger.get_fasta()
+    print "DONE FASTA"
+
+    highest_stop = 10
+    lowest_start = 1
+
     insert_values(highest_stop, lowest_start, 2)
     insert_values(highest_stop, "unspecified", 0)
     print "Sequentie schrijven"
-    write_file(origin.origin())
+    generate_fasta()
+    write_file()
     sluiter = "//"
     write_file(sluiter)
     print "Klaar!"
@@ -50,34 +64,28 @@ def insert_values(maxpar, extrapar, type):
         writefile.write(line)
 
 
-def write_file(wfgenbank):
-    """
-    De functie opent het genbank bestand
-    en voegt de parameter toe aan het bestand.
-    """
-
-    openfile = open('test_def2.gbk', 'a')
-    openfile.write(str(wfgenbank))
-    openfile.close()
 
 
-def open_gff():
+
+def open_gff(merger):
     """
     Het gff bestand wordt geopend, de rijen in het bestand
     worden toegevoegd aan een nieuwe lijst. Deze wordt
     teruggegeven.
     """
-
+    print "dictionary maken!"
+    merger.do_dict()
+    print "klaarr"
     gff_file = open('test_def.gff', 'rb', buffering=1)
     reader = csv.reader(gff_file, delimiter="\t")
     for row in reader:
         if "#" not in row[0]:
-            make_gb(row, filters(row))
+            make_gb(row, filters(row), merger)
 
 
 
 
-def make_gb(mgb_rijen, mgb_attrijen):
+def make_gb(mgb_rijen, mgb_attrijen, merge_object):
     """
     Een standaard header wordt aangemaakt.
     De source regel wordt opgesteld door te kijken naar de laagste
@@ -96,24 +104,34 @@ def make_gb(mgb_rijen, mgb_attrijen):
     Iedere instantie wordt dan appart meegegeven aan de functie writeFile.
     """
 
+
     featurelist = []
 
     mgb_attdict = mgb_attrijen
     finalstring = ''
-    samenvoegen = Merger()
-    samenvoegen.do_dict()
-    contigdict = samenvoegen.get_dict()
-    if "contig" in mgb_attdict.get('id').lower():
+    # print "Merger samenvoegen maken"
+
+    # print "samenvoegen gemaakt"
+    # print "Dictionary maken"
+
+    # print "Dictionary gemaakt"
+    contigdict = merge_object.get_dict()
+    testvar = mgb_attdict.get('id').lower()
+
+    if "contig" in testvar:
         # print mgb_attdict.get('id').lower()
-        if ":" in mgb_attdict.get('id'):
-            contig = mgb_attdict.get('id').split(':')[0]
-        elif ":" not in mgb_attdict.get('id'):
-            contig = mgb_attdict.get('id')
+        if ":" in testvar:
+            contig = testvar.split(':')[0]
+        elif ":" not in testvar:
+            contig = testvar
         else:
             contig = "AAAA"
         try:
-            print contigdict[contig][0]
+            #print contigdict[contig]
+            #print "HEBBES!"
+            pass
         except KeyError:
+            #print contig
             pass
 
     # Eerste: feature
