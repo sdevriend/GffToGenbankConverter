@@ -1,0 +1,48 @@
+from math import ceil
+
+
+def reader(f):
+    while True:
+        line = f.readline()
+        if line == "":
+            break
+        elif line[0] != ">":
+            yield line[:-1].upper()
+
+
+def origin_line(chars, pos):
+    length = len(chars)
+    parts = int(ceil(float(length)/10))     
+    lijst = [chars[x:x + 10] for x in range(0, length, 10)]
+    out = ((("      %s" % str((pos*60)+1))[-10:]) +
+           ((" %s" * parts) % tuple(lijst)) + "\n")
+    return out
+
+
+def writer(f, save):
+    lines = reader(f)
+    print "generator made"
+    chars = ""
+    print "reading lines"
+    num = 0
+    pos = 0
+    for x in lines:
+        num += 1
+        if num % 1000 == 0:
+            print "writing", num
+        chars += x
+        while len(chars) >= 60:
+            save.write(origin_line(chars[:60], pos))
+            chars = chars[60:]
+            pos += 1
+    if chars != "":
+        save.write(origin_line(chars, pos))
+    print "done"
+
+    
+if __name__ == "__main__":
+    f = open("carp_pbjelly.fa", "r")
+    save = open("save.temp", "w")
+    writer(f, save)
+    f.close()
+    save.close()
