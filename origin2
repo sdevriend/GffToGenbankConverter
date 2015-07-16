@@ -14,7 +14,7 @@ def origin_line(chars, pos):
     length = len(chars)
     parts = int(ceil(float(length)/10))     
     lijst = [chars[x:x + 10] for x in range(0, length, 10)]
-    out = ((("      %s" % str((pos*60)+1))[-10:]) +
+    out = ((("         %s" % str((pos*60)+1))[-10:]) +
            ((" %s" * parts) % tuple(lijst)) + "\n")
     return out
 
