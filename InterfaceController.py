@@ -8,6 +8,11 @@ en stuurt de gegevens door naar de converter.
 import wx
 
 from InvoerScherm import InvoerScherm
+from gff_conversiescript import gff_conversie
+from UitvoerScherm import UitvoerScherm
+from EindScherm import EindScherm
+from GaugeFrame import GaugeFrame # kan weg ?
+import threading
 
 class ConvertInterface(wx.App):
 
@@ -20,7 +25,7 @@ class ConvertInterface(wx.App):
         De return True statement is om de app te laten runnen door wx.
         """
         self.SchermNr = 0
-        self.SchermLijst = [InvoerScherm]
+        self.SchermLijst = [InvoerScherm, UitvoerScherm, EindScherm]
         self.SchermController()
         self.Bind(wx.EVT_BUTTON, self.KnopBeheer)
         return True
@@ -31,6 +36,43 @@ class ConvertInterface(wx.App):
         schermFormaat = (700, 400)
         self.frame = self.SchermLijst[self.SchermNr](None, title=strNaam,
                                                      size=schermFormaat)
+    def beheer_conversie(self):
+        
+        try:
+            #status = wx.MessageDialog(self.frame, "dingetje is bezig", "ding bezig",
+                          #wx.STAY_ON_TOP  | wx.CANCEL)
+            #status.SetOKLabel("stop")
+            
+            f = self.files
+            #self.gFr = GaugeFrame(self.frame, "Omzetten", 60)
+            #self.gFr.Show()
+            #gff_conversie(f[0], f[1], f[2], f[3])
+            draad = threading.Thread(target=gff_conversie,
+                                    args=(f[0], f[1], f[2], f[3]))
+            draad.setDaemon(True)
+            
+            
+            draad.start()
+            self.frame.addThread(draad)
+            
+            #status.ShowModal()
+            draad.join()
+            #status.EndModal()
+            #self.gFr.Hide()
+            print "draadje"
+            #raise ValueError
+            return 5
+            #pass # script hier
+            
+        except Exception as e:
+            print e.args
+            print "error"
+            wx.MessageBox("Er is iets fout gegaan bij het converteren" +
+                          " probeer het eens met een ander bestand.",
+                          "Fout bij het converteren",
+                           wx.OK | wx.ICON_ERROR)
+            pass ## start script.
+        
 
 
     def KnopBeheer(self, event):
@@ -42,17 +84,14 @@ class ConvertInterface(wx.App):
                 wx.MessageBox("Niet alles is ingevuld!", "Foutmelding",
                               wx.OK | wx.ICON_ERROR)
             else:
-                try:
-                    print self.files
-                    raise ValueError
-                    pass # script hier
-                except:
-                    wx.MessageBox("Er is iets fout gegaan bij het converteren" +
-                                  " probeer het eens met een ander bestand.",
-                                  "Fout bij het converteren",
-                                  wx.OK | wx.ICON_ERROR)
-                pass ## start script.
-            
+                self.SluitScherm()
+                draad = threading.Thread(target=self.beheer_conversie)
+                draad.setDaemon(True)
+                self.frame.addThread(draad)
+                draad.start()
+                
+                
+                            
         elif event.GetId() == Help:
             wx.MessageBox("Hier kunt u de files inladen die nodig zijn" +
                           " die nodig zijn voor de conversie. \n" +
@@ -62,7 +101,15 @@ class ConvertInterface(wx.App):
                           "\t\t-Een annotation bestand", "Info", wx.OK)
                           
 
-
+    def SluitScherm(self):
+        """
+        De functie sluit self.frame, telt 1 bij de schermteller en
+        start de functie SchermBeheer op.
+        """
+        print "sluiot"
+        self.frame.Destroy()
+        self.SchermNr += 1
+        self.SchermController()
             
 app = ConvertInterface(False)
 app.MainLoop()

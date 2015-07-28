@@ -1,6 +1,8 @@
 annotationdict = {}
 def refference():
-    reffile = open("annotest.csv", 'r')
+
+    ##reffile = open("annotest.csv", 'r')
+    reffile = open('D:\\ncbi_data\\software\\Converter\\annotest.csv', 'r')
     lines = reffile.readlines()
     annotations = []
     for line in lines:

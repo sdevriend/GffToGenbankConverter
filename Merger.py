@@ -7,7 +7,9 @@ class Merger():
     in de lange sequenties.
     """
 
-    def __init__(self):
+    def __init__(self, fasta_name):
+        # Aanpassing: fasta_name nodig voor input. Global var
+        # self.fastafilename wordt hier toegewezen aan input.
         """
         De fastabestanden worden uitgelezen. Er wordt door deze lijst geloopd
         Als het de header betreft (>) wordt de naam als key in de dictionary
@@ -16,6 +18,7 @@ class Merger():
         Als het de sequentie betreft, wordt deze aan de lange string van sequentie toegevoegd.
         :return:
         """
+        self.fastafilename = fasta_name
         self.linelist = []
         self.length = 1
         self.contigs = []
@@ -48,12 +51,14 @@ class Merger():
 
 
     def setlines(self):
+        # Aanpassing om input file te lezen. Kan aangepast worden
+        # door self.fastafilename hier te declareren of in gff
+        # de __main__ aan te passen.
         """
         Het fasta bestand wordt uitgelezen
         :return: de regels in het bestand
         """
-
-        fastafile = open("carp_pbjelly.fa")
+        fastafile = open(self.fastafilename)
         fastaseqs = fastafile.readlines()
         fastafile.close()
         return fastaseqs

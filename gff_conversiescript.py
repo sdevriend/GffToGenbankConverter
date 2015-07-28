@@ -3,14 +3,20 @@ from datetime import datetime
 SUPERSTRING = ''
 import csv
 from Statistiek import Statistiek
-import origin
+##import origin
 from Refference import check
 from Merger import Merger
 from Writefile import write_file
+from Writefile import write_list
+from Writefile import make_gbk_file
 from Fastagenerator import generate_fasta
 
+##import threading
+import multiprocessing as mp
+import gc
 
-def main():
+def gff_conversie(gff_name, fasta_name, annot_file, gbk_name):
+    #Functie hernoemd van main naar gff_conversie
     """
     De functie roept de andere functies aan:
     het openen van de file, het maken van een multidimensionale lijst,
@@ -18,17 +24,24 @@ def main():
     het schrijven van de afsluitende tag //
     """
     print "Merger maken"
-    merger = Merger()
+    merger = Merger(fasta_name)
 
     print "Merger klaar"
 
     stopwatch = Statistiek()
-    write_file('LOCUS PLACEHOLDER\n')
-    write_file('FEATURES\t\tLocation/Qualifiers\n')
-    write_file("PLACEHOLDER\n")
+    make_gbk_file(gbk_name)
+    write_file('LOCUS PLACEHOLDER\n', gbk_name)
+    write_file('FEATURES\t\tLocation/Qualifiers\n', gbk_name)
+    write_file("PLACEHOLDER\n", gbk_name)
     print "GFF bestand openen"
-    open_gff(merger)
-
+    print "de merge ding"
+    
+    merger.do_dict()
+    
+    contigdict = merger.get_dict()
+    print "na merger do dict"
+    dataBalancer(contigdict, gff_name, gbk_name)
+    print "Na verdeel"
     print "Bestand genereren"
     print "DO FASTA"
 
@@ -38,19 +51,19 @@ def main():
     highest_stop = 10
     lowest_start = 1
 
-    insert_values(highest_stop, lowest_start, 2)
-    insert_values(highest_stop, "unspecified", 0)
+    insert_values(highest_stop, lowest_start, 2, gbk_name)
+    insert_values(highest_stop, "unspecified", 0, gbk_name)
     print "Sequentie schrijven"
-    generate_fasta()
-    write_file()
+    generate_fasta(fasta_name, gbk_name)
+    ##write_file()
     sluiter = "//"
-    write_file(sluiter)
+    write_file(sluiter, gbk_name)
     print "Klaar!"
     stopwatch.stop()
 
 
-def insert_values(maxpar, extrapar, type):
-    readfile = open('test_def2.gbk', 'r')
+def insert_values(maxpar, extrapar, type, gbk_name):
+    readfile = open(gbk_name, 'r')
     lines = readfile.readlines()
     readfile.close()
     if type == 2:
@@ -59,33 +72,107 @@ def insert_values(maxpar, extrapar, type):
     if type == 0:
         insertstring = "LOCUS\t\t%s\t%s" % (str(extrapar), str(maxpar) + " bp \t DNA \n")
     lines[type] = insertstring
-    writefile = open('test_def2.gbk', 'w')
+    writefile = open(gbk_name, 'w')
     for line in lines:
         writefile.write(line)
+    writefile.close()
 
 
 
 
 
-def open_gff(merger):
+def open_gff(gff_name):
     """
     Het gff bestand wordt geopend, de rijen in het bestand
-    worden toegevoegd aan een nieuwe lijst. Deze wordt
-    teruggegeven.
+    worden terug gegeven als de generator wordt aangeroepen. Als
+    het bestand leeg is, dan wordt None terug gegeven.
     """
-    print "dictionary maken!"
-    merger.do_dict()
-    print "klaarr"
-    gff_file = open('test_def.gff', 'rb', buffering=1)
+    # Hier heb ik een aantal aanpassingen gemaakt. Ik heb als eerste
+    # de open_gff omgezet naar een generator. Deze yield een rij en
+    # None als de file leeg is. Daarnaast wordt de filename bepaald
+    # door gff_name. Deze wordt meegegven door de interface, maar kan ook
+    # aangepast worden in de main.
+    gff_file = open(gff_name, 'rb', buffering=1)
     reader = csv.reader(gff_file, delimiter="\t")
+    
     for row in reader:
         if "#" not in row[0]:
-            make_gb(row, filters(row), merger)
+            yield row
+    while True:
+        yield None
 
 
 
+def dataBalancer(contigdict, gff_name, gbk_name):
+    """
+    Input: 3
+        contigdict, contig dictionary van merger.
+        gff_name: bestandsnaam
+        gbk_name: bestandsnaam
 
-def make_gb(mgb_rijen, mgb_attrijen, merge_object):
+    De functie heeft eerst gebruik gemaakt van multi process, maar
+    blijkt bij monitoring het toch niet nodig te hebben.
+
+    De functie maakt een generator aan met de naam data. Vervolgens
+    worden de loop variabelen data en stop gemaakt.
+
+    In rij komt elke yield van data te staan. En stop is de boolean om
+    de loop te stoppen als rij een None yield.
+
+    De functie loopt op een while met als conditie dat de loop stopt
+    als er geen regels meer in het bestand zitten.
+
+    In de while loop wordt de resultaat lijst aangemaakt en de draden
+    lijst. De draden lijst is voor de eerste for loop.
+        In de eerste for loop wordt er 8 keer geloopt. Dit was voor de
+        8 cores, maar werkt serial ook erg goed. In de 8 for loop wordt
+        er 100 duizend keer geloopt om data punten te yielden en toe te
+        voegen aan de lijst draadlijst, tenzij er een None wordt geyield,
+        dan wordt de loop afgesloten.
+    De 8 multi dementionale lijsten worden na de vul loops 1 voor 1
+    doorgegven aan de functie lijst_gb_invoer, het resultaat daarvan
+    wordt in de resultaat lijst gezet en wordt doorgegeven aan
+    write_list zodat er 800k lines geschreven worden.
+    """
+    print "start verdeel"
+    print gff_name
+    verdeelstat = Statistiek()
+    data = open_gff(gff_name)
+    rij = "" #declaratie voor while loop
+    stop = False
+    while rij != None:
+        resultaat = []
+        draden = []
+        for x in range(8):
+            draadlijst = []
+            for x in range(100000):
+                rij = data.next()
+                
+                if rij == None:
+                    stop = True
+                    break
+                else:
+                   draadlijst.append(rij)
+            draden.append(draadlijst)      
+            if stop:
+                break
+        for draad in draden:
+            resultaat.append(lijst_gb_invoer(draad, contigdict))
+        write_list(resultaat, gbk_name)
+                   
+
+    
+    verdeelstat.stop()    
+    print "einde verdeelstation"
+
+
+def lijst_gb_invoer(lgi_lijst, merger):
+    gb_lijst = []
+    for item in lgi_lijst:
+        gb_lijst += make_gb(item, merger)
+    return gb_lijst
+    
+def make_gb(mgb_rijen, contigdict):
     """
     Een standaard header wordt aangemaakt.
     De source regel wordt opgesteld door te kijken naar de laagste
@@ -104,10 +191,12 @@ def make_gb(mgb_rijen, mgb_attrijen, merge_object):
     Iedere instantie wordt dan appart meegegeven aan de functie writeFile.
     """
 
-
+    ##print "aantal rijen: ",len(mgb_rijen)
+    ##print "aantal attrij: ", len(mgb_attrijen)
+    
     featurelist = []
 
-    mgb_attdict = mgb_attrijen
+    mgb_attdict = filters(mgb_rijen)
     finalstring = ''
     # print "Merger samenvoegen maken"
 
@@ -115,7 +204,7 @@ def make_gb(mgb_rijen, mgb_attrijen, merge_object):
     # print "Dictionary maken"
 
     # print "Dictionary gemaakt"
-    contigdict = merge_object.get_dict()
+    
     testvar = mgb_attdict.get('id').lower()
 
     if "contig" in testvar:
@@ -126,13 +215,13 @@ def make_gb(mgb_rijen, mgb_attrijen, merge_object):
             contig = testvar
         else:
             contig = "AAAA"
-        try:
+        """try:
             #print contigdict[contig]
             #print "HEBBES!"
             pass
         except KeyError:
             #print contig
-            pass
+            pass"""
 
     # Eerste: feature
 
@@ -164,10 +253,13 @@ def make_gb(mgb_rijen, mgb_attrijen, merge_object):
 
     featurelist.append(finalstring)
     # features.append(featurelist)
-    for i in range(len(featurelist)):
+    ##print featurelist
+    """for i in range(len(featurelist)):
         genbank = featurelist[i]
         write_file(genbank)
-
+    """
+    ## wat doet deze?
+    
     return featurelist
 
 
@@ -178,7 +270,7 @@ def filters(rijen, versie=3):
     splitter = {2: " ", 3: ";"}
 
     current = rijen[8].split(splitter[versie])
-
+    
     if versie == 2:
         att = {"id": None, "name": None, "alias": None, "parent": None,
                "target": None, "gap": None, "derives_from": None,
@@ -220,5 +312,16 @@ in multirij:
 7 : frame
 8 : group
 '''
-main()
+if __name__ == '__main__':
+    """
+    Functie roept de hernoemde main aan, gff conversie.
+    Aan gff_conversie worden 4 data punten meegegeven. Deze kunnnen
+    aangepast worden naar eigen bestandspaden voor test doeleindes.
+    """
+    mp.freeze_support() # oude line
+    gffname = "D:\\ncbi_data\\software\\Converter\\testfile_500klines.gff"
+    fastaname = "D:\\ncbi_data\\software\\Converter\\carp_pbjelly.fa"
+    gbk_name = "D:\\ncbi_data\\software\\Converter\\carp_pbjelly.gbk"
+    annot_file = "bla"
+    gff_conversie(gffname, fastaname, gbk_name, annot_file)
 

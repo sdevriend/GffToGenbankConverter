@@ -43,12 +43,13 @@ class InvoerScherm(wx.Frame):
     def middenstuk(self):
         self.gff = Bestandspaneel(self,"""gff(*.gff)|*.gff""",
                                         label="GFF file")
-        self.raw = Bestandspaneel(self,"""fasta(*.fasta)|*.fasta""",
+        self.raw = Bestandspaneel(self,"""fasta(*.fasta, *.fsa, *.fa)
+                                          |*.fasta;*.fsa;*.fa""",
                                         label="RAW file")
         self.annot = Bestandspaneel(self, """*(*.*)|*.*""",
                                     label="Annotation \nfile")
                                            
-        self.save = Bestandspaneel(self, """gb(*.gb)|*.gb""",
+        self.save = Bestandspaneel(self, """Genbank(*.gbk)|*.gbk""",
                                     label="Opslaan \nlocatie", save=True)
         
         
@@ -79,7 +80,7 @@ class InvoerScherm(wx.Frame):
         naam3 = self.annot.getFilePath()
         naam4 = self.save.getFilePath()
         if len(naam4) == 0:
-            naam4 = naam1[:-3] + "gb"
+            naam4 = naam1[:-3] + "gbk"
         return [naam1, naam2, naam3, naam4]
 
     def getHelpKnopId(self):
