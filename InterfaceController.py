@@ -43,6 +43,7 @@ class ConvertInterface(wx.App):
                               wx.OK | wx.ICON_ERROR)
             else:
                 try:
+                    print self.files
                     raise ValueError
                     pass # script hier
                 except:
