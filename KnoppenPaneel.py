@@ -1,19 +1,19 @@
 """
-Sebastiaan de Vriend 8-7-15 Knoppen paneel opmaken
+Sebastiaan de Vriend 8-7-15 Knoppen paneel opmaken.
+Sebastiaan de Vriend 28-7-15 Documentatie nalopen.
 
 De class maakt een knoppen paneel voor 3 knoppen. Minder knoppen
 kunnen ook gemaakt worden.
 """
 
-import wx
 import sys
+import wx
+
 from SubPaneel import SubPaneel
 
 
 class KnoppenPaneel(wx.Panel):
     """
-    De class is nog niet helemaal netjes en af.
-
     Het idee is om een knoppen paneel te maken. Hierop komen drie knoppen
         GoKnop: Voor volgende, nog niks mee gedaan.
         HelpKnop: Voor een popup voor het helpscherm, niks mee gedaan.
@@ -56,7 +56,9 @@ class KnoppenPaneel(wx.Panel):
         
         
     def getGoKnopId(self):
+        """Geeft de id van de Go Knop terug aan hogere lvl interface."""
 	return self.GoKnop.GetId()
 
     def getHelpKnopId(self):
+        """Geeft de id van de help Knop terug aan hogere lvl interface."""
 	return self.HelpKnop.GetId()

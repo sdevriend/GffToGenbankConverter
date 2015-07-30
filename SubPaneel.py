@@ -1,5 +1,4 @@
 """
-
 Een standaard subpaneel.
 """
 

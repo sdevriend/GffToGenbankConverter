@@ -5,15 +5,14 @@ import csv
 from Statistiek import Statistiek
 ##import origin
 from Refference import check
+from Refference import refference
 from Merger import Merger
 from Writefile import write_file
 from Writefile import write_list
 from Writefile import make_gbk_file
 from Fastagenerator import generate_fasta
 
-##import threading
-import multiprocessing as mp
-import gc
+
 
 def gff_conversie(gff_name, fasta_name, annot_file, gbk_name):
     #Functie hernoemd van main naar gff_conversie
@@ -25,7 +24,7 @@ def gff_conversie(gff_name, fasta_name, annot_file, gbk_name):
     """
     print "Merger maken"
     merger = Merger(fasta_name)
-
+    refference(annot_file)
     print "Merger klaar"
 
     stopwatch = Statistiek()
@@ -57,6 +56,7 @@ def gff_conversie(gff_name, fasta_name, annot_file, gbk_name):
     generate_fasta(fasta_name, gbk_name)
     ##write_file()
     sluiter = "//"
+    
     write_file(sluiter, gbk_name)
     print "Klaar!"
     stopwatch.stop()
@@ -298,6 +298,16 @@ def filters(rijen, versie=3):
 
     return att
 
+def run_gff_conversie(gff_name, fasta_name, annot_file, gbk_name, queue):
+    try:
+        gff_conversie(gff_name, fasta_name, annot_file, gbk_name)
+        queue.put("Goed")
+    except Exception as e:
+        print e.args
+        if e.args == ():
+            queue.put(e.args)
+        else:
+            queue.put(e[0])
 
 '''
 referentie

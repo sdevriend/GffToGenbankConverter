@@ -1,8 +1,9 @@
 annotationdict = {}
-def refference():
+def refference(annot_file):
 
     ##reffile = open("annotest.csv", 'r')
-    reffile = open('D:\\ncbi_data\\software\\Converter\\annotest.csv', 'r')
+    ##reffile = open('D:\\ncbi_data\\software\\Converter\\annotest.csv', 'r')
+    reffile = open(annot_file, 'r')
     lines = reffile.readlines()
     annotations = []
     for line in lines:
@@ -25,5 +26,5 @@ def check(paramkey):
         # print key
         if key == paramkey:
             return str(annotationdict[key][0])
-refference()
-#print (check("cypCar_00000001-RA"))
+#refference()
+#print (check("cypCar_00000001-RA", "bla"))
