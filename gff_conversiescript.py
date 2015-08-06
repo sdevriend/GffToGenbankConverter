@@ -33,12 +33,7 @@ def gff_conversie(gff_name, fasta_name, annot_file, gbk_name):
     write_file('FEATURES\t\tLocation/Qualifiers\n', gbk_name)
     write_file("PLACEHOLDER\n", gbk_name)
     print "GFF bestand openen"
-    print "de merge ding"
-    
-    merger.do_dict()
-    
-    contigdict = merger.get_dict()
-    print "na merger do dict"
+    contigdict = merger.getdict()
     dataBalancer(contigdict, gff_name, gbk_name)
     print "Na verdeel"
     print "Bestand genereren"
@@ -157,7 +152,7 @@ def dataBalancer(contigdict, gff_name, gbk_name):
             if stop:
                 break
         for draad in draden:
-            resultaat.append(lijst_gb_invoer(draad, contigdict))
+            resultaat.append(lijst_gb_invoer(draad,contigdict))
         write_list(resultaat, gbk_name)
                    
 
@@ -166,10 +161,10 @@ def dataBalancer(contigdict, gff_name, gbk_name):
     print "einde verdeelstation"
 
 
-def lijst_gb_invoer(lgi_lijst, merger):
+def lijst_gb_invoer(lgi_lijst, contigdict):
     gb_lijst = []
     for item in lgi_lijst:
-        gb_lijst += make_gb(item, merger)
+        gb_lijst += make_gb(item, contigdict)
     return gb_lijst
     
 def make_gb(mgb_rijen, contigdict):
@@ -211,17 +206,19 @@ def make_gb(mgb_rijen, contigdict):
         # print mgb_attdict.get('id').lower()
         if ":" in testvar:
             contig = testvar.split(':')[0]
+            
         elif ":" not in testvar:
             contig = testvar
         else:
             contig = "AAAA"
-        """try:
-            #print contigdict[contig]
-            #print "HEBBES!"
-            pass
+    
+        try:
+            start = contigdict[contig]
+            print start
         except KeyError:
-            #print contig
-            pass"""
+            print "Can't find this contig in the raw file"
+            pass
+
 
     # Eerste: feature
 
@@ -328,7 +325,7 @@ if __name__ == '__main__':
     Aan gff_conversie worden 4 data punten meegegeven. Deze kunnnen
     aangepast worden naar eigen bestandspaden voor test doeleindes.
     """
-    mp.freeze_support() # oude line
+    #mp.freeze_support() # oude line
     gffname = "D:\\ncbi_data\\software\\Converter\\testfile_500klines.gff"
     fastaname = "D:\\ncbi_data\\software\\Converter\\carp_pbjelly.fa"
     gbk_name = "D:\\ncbi_data\\software\\Converter\\carp_pbjelly.gbk"
