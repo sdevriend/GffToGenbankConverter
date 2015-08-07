@@ -213,10 +213,11 @@ def make_gb(mgb_rijen, contigdict):
             contig = "AAAA"
     
         try:
-            start = contigdict[contig]
-            print start
+            start = contigdict[contig.lower()]
+            print start, contig.lower()
+            print "Found it!"
         except KeyError:
-            print "Can't find this contig in the raw file"
+            print "Can't find this contig in the raw file\t", contig.lower()
             pass
 
 
